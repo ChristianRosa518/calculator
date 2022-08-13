@@ -1,0 +1,68 @@
+.itemOne {
+  grid-column: 1;
+  grid-row: 1;
+}
+.itemTwo {
+  grid-column: 2;
+  grid-row: 1;
+}
+.itemThree {
+  grid-column: 3;
+  grid-row: 1;
+}
+.itemFour {
+  grid-column: 1;
+  grid-row: 2;
+}
+.itemFive {
+  grid-column: 2;
+  grid-row: 2;
+}
+.itemSix {
+  grid-column: 3;
+  grid-row: 2;
+}
+.itemSeven {
+  grid-column: 1;
+  grid-row: 3;
+}
+.itemEight {
+  grid-column: 2;
+  grid-row: 3;
+}
+.itemNine {
+  grid-column: 3;
+  grid-row: 3;
+}
+.itemTen {
+  grid-column: 1;
+  grid-row: 4;
+}
+.itemEleven {
+  grid-column: 2;
+  grid-row: 4;
+}
+.itemTwelve {
+  grid-column: 3;
+  grid-row: 4;
+}
+.itemThirteen {
+  grid-column: 4;
+  grid-row: 1;
+}
+.itemFourteen {
+  grid-column: 4;
+  grid-row: 2;
+}
+.itemFifteen {
+  grid-column: 4;
+  grid-row: 3;
+}
+.itemSixteen {
+  grid-column: 4;
+  grid-row: 4;
+}
+.itemSeventeen {
+  grid-column: 1/5;
+  grid-row: 5;
+}
