@@ -1,3 +1,4 @@
+import { format } from 'path';
 import React, { useState } from 'react';
 import styles from './Calc.module.css';
 import grid from './Grid.module.css';
@@ -14,117 +15,102 @@ interface Props {
 }
 
 export const Calc: React.FC = () => {
-  const [screen, setScreen] = useState<string | number>('0');
-  const [currentValue, setCurrentValue] = useState<string>('0');
-  const [secondValue, setSecondValue] = useState<string>('0');
+  const [screen, setScreen] = useState<string>('');
+  const [current, setCurrent] = useState<string>('0');
+  const [values, setValues] = useState<(string | number)[]>([]);
   const [operator, setOperator] = useState<string>('none');
   const [reset, setReset] = useState<boolean>(false);
 
   function setOpe(val: string) {
-    setScreen(currentValue + ' ' + val + ' ');
-    setOperator(val);
+    const lastItem: number = values.length - 1;
+    if (values.length === 0 && current !== '0') {
+      values.push(current, val);
+      setCurrent('0');
+      setScreen(formatScreen(values));
+    } else if (
+      current === '0' &&
+      (values[lastItem] === '+' ||
+        values[lastItem] === '-' ||
+        values[lastItem] === 'x' ||
+        values[lastItem] === '/')
+    ) {
+      values[lastItem] = val;
+      setValues(values);
+      setScreen(formatScreen(values));
+    } else if (current !== '0') {
+      values.push(current, val);
+      setCurrent('0');
+      setValues(values);
+      setScreen(formatScreen(values));
+    }
+  }
+  function formatScreen(arr: (string | number)[]) {
+    let format: string = '';
+    for (let i = 0; i < arr.length; i++) {
+      format = format + arr[i] + ' ';
+      if (i === arr.length) {
+      }
+    }
+    return format;
   }
 
   function clear() {
-    setCurrentValue('0');
-    setSecondValue('0');
+    setCurrent('0');
+    setValues([]);
     setOperator('none');
-    setScreen('0');
+    setScreen('');
   }
   function calcClear(value: number) {
-    let result = value.toString();
-    setCurrentValue(result);
-    setSecondValue('0');
+    let result: string = value.toString();
+    setCurrent(result);
+    setValues([]);
     setOperator('none');
     setReset(true);
   }
 
   function calculate() {
-    let first: number = Number(currentValue);
-    let second: number = Number(secondValue);
-    switch (operator) {
-      case '+':
-        let result: number = first + second;
-        setScreen(result);
-        calcClear(result);
-        break;
-      case '-':
-        let resultTwo: number = first - second;
-        setScreen(resultTwo);
-        calcClear(resultTwo);
-        break;
-      case 'x':
-        let resultThree: number = first * second;
-        setScreen(resultThree);
-        calcClear(resultThree);
-        break;
-      case '/':
-        let resultFour: number = first / second;
-        setScreen(resultFour);
-        calcClear(resultFour);
-        break;
+    values.push(current);
+    // do pemdas.
+    if (values.length > 0) {
+      if (values.includes('/')) {
+        let divide: number = values.indexOf('/');
+        console.log(divide);
+        let prev: number = divide - 1;
+        let next: number = divide + 1;
+
+        let value: number = Number(values[prev]) / Number(values[next]);
+        values[divide] = value;
+        console.log(values);
+        values.splice(next, 1);
+        console.log(values);
+        values.splice(prev, 1);
+        console.log(values);
+        setValues(values);
+        console.log(values);
+      }
     }
   }
 
   function addValue(num: string) {
-    if (reset === true && operator === 'none') {
-      let current: string = '0';
-      if (current === '0' && num !== '.') {
-        setCurrentValue(num);
-        setScreen(num);
-        setReset(false);
-      } else if (current === '0' && num === '.') {
-        setCurrentValue('0.');
-        setScreen('0.');
-        setReset(false);
-      } else if (current !== '0') {
-        if (current.includes('.') && num === '.') {
-        } else {
-          setCurrentValue(currentValue + num);
-          setScreen(currentValue + num);
-          setReset(false);
-        }
-      }
-    } else {
-      if (operator === 'none') {
-        if (currentValue === '0' && num !== '.') {
-          setCurrentValue(num);
-          setScreen(num);
-        } else if (currentValue === '0' && num === '.') {
-          setCurrentValue('0.');
-          setScreen('0.');
-        } else if (currentValue !== '0') {
-          if (currentValue.includes('.') && num === '.') {
-          } else {
-            setCurrentValue(currentValue + num);
-            setScreen(currentValue + num);
-          }
-        }
-      } else if (operator !== 'none') {
-        if (secondValue === '0' && num !== '.') {
-          let newNum = num;
-          setScreen(screen + newNum);
-          setSecondValue(newNum);
-        } else if (secondValue === '0' && num === '.') {
-          let newNum = num;
-          newNum = newNum + '.';
-          setScreen(screen + newNum);
-          setSecondValue(newNum);
-        } else if (secondValue !== '0') {
-          if (secondValue.includes('.') && num === '.') {
-          } else {
-            let newNum = num;
-            setScreen(screen + newNum);
-            setSecondValue(secondValue + newNum);
-          }
-        }
+    if (current === '0' && num !== '.') {
+      setCurrent(num);
+      setScreen(formatScreen(values) + ' ' + num);
+    } else if (current === '0' && num === '.') {
+      setCurrent('0.');
+      setScreen(formatScreen(values) + ' 0.');
+    } else if (current !== '0') {
+      if (current.includes('.') && num === '.') {
+      } else {
+        setCurrent(current + num);
+        setScreen(formatScreen(values) + ' ' + (current + num));
       }
     }
   }
 
   return (
     <div className={styles.container}>
-      <div className={styles.screen}>{screen}</div>
+      {screen.length === 0 && <div className={styles.screen}>0</div>}
+      {screen.length > 0 && <div className={styles.screen}>{screen}</div>}
       <div className={styles.buttonCon}>
         <div
           className={`${styles.numButton} ${grid.itemOne}`}
