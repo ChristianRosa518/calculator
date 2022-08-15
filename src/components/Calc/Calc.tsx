@@ -1,5 +1,6 @@
 import { format } from 'path';
 import React, { useState } from 'react';
+import { act } from 'react-dom/test-utils';
 import styles from './Calc.module.css';
 import grid from './Grid.module.css';
 
@@ -14,19 +15,58 @@ interface Props {
   // fn: (bob: string) => string
 }
 
-export const Calc: React.FC = () => {
-  const [screen, setScreen] = useState<string>('');
+interface CalcState {
+  count: string;
+  screen: string[];
+}
+
+interface CalcAction {
+  type: string;
+  payload: string;
+}
+
+const initialState: CalcState = { count: '0', screen: ['0'] };
+
+function reducer(state: CalcState, action: CalcAction) {
+  let { payload } = action;
+  let { count, screen } = state;
+
+  switch (action.type) {
+    case 'number':
+      if (count === '0') {
+        return { count: payload, screen: [payload] };
+      } else
+        return {
+          count: count + payload,
+          screen: [screen + payload],
+        };
+    case 'decimal':
+      if (count.includes('.')) {
+        return { ...state };
+      } else
+        return {
+          ...state,
+          count: count + payload,
+          screen: [screen + payload],
+        };
+    case 'clear':
+      return { count: '0', screen: ['0'] };
+    default:
+      return state;
+  }
+}
+
+export const Calc = () => {
+  const [state, dispatch] = React.useReducer(reducer, initialState);
+
   const [current, setCurrent] = useState<string>('0');
   const [values, setValues] = useState<(string | number)[]>([]);
-  const [operator, setOperator] = useState<string>('none');
-  const [reset, setReset] = useState<boolean>(false);
 
   function setOpe(val: string) {
     const lastItem: number = values.length - 1;
     if (values.length === 0 && current !== '0') {
       values.push(current, val);
       setCurrent('0');
-      setScreen(formatScreen(values));
     } else if (
       current === '0' &&
       (values[lastItem] === '+' ||
@@ -36,14 +76,13 @@ export const Calc: React.FC = () => {
     ) {
       values[lastItem] = val;
       setValues(values);
-      setScreen(formatScreen(values));
     } else if (current !== '0') {
       values.push(current, val);
       setCurrent('0');
       setValues(values);
-      setScreen(formatScreen(values));
     }
   }
+
   function formatScreen(arr: (string | number)[]) {
     let format: string = '';
     for (let i = 0; i < arr.length; i++) {
@@ -52,20 +91,6 @@ export const Calc: React.FC = () => {
       }
     }
     return format;
-  }
-
-  function clear() {
-    setCurrent('0');
-    setValues([]);
-    setOperator('none');
-    setScreen('');
-  }
-  function calcClear(value: number) {
-    let result: string = value.toString();
-    setCurrent(result);
-    setValues([]);
-    setOperator('none');
-    setReset(true);
   }
 
   function calculate() {
@@ -91,96 +116,82 @@ export const Calc: React.FC = () => {
     }
   }
 
-  function addValue(num: string) {
-    if (current === '0' && num !== '.') {
-      setCurrent(num);
-      setScreen(formatScreen(values) + ' ' + num);
-    } else if (current === '0' && num === '.') {
-      setCurrent('0.');
-      setScreen(formatScreen(values) + ' 0.');
-    } else if (current !== '0') {
-      if (current.includes('.') && num === '.') {
-      } else {
-        setCurrent(current + num);
-        setScreen(formatScreen(values) + ' ' + (current + num));
-      }
-    }
-  }
-
   return (
     <div className={styles.container}>
-      {screen.length === 0 && <div className={styles.screen}>0</div>}
-      {screen.length > 0 && <div className={styles.screen}>{screen}</div>}
+      {state.screen.length === 0 && <div className={styles.screen}>0</div>}
+      {state.screen.length > 0 && (
+        <div className={styles.screen}>{state.screen}</div>
+      )}
       <div className={styles.buttonCon}>
         <div
           className={`${styles.numButton} ${grid.itemOne}`}
-          onClick={() => addValue('1')}
+          onClick={() => dispatch({ type: 'number', payload: '1' })}
         >
           1
         </div>
         <div
           className={`${styles.numButton} ${grid.itemTwo}`}
-          onClick={() => addValue('2')}
+          onClick={() => dispatch({ type: 'number', payload: '2' })}
         >
           2
         </div>
         <div
           className={`${styles.numButton} ${grid.itemThree}`}
-          onClick={() => addValue('3')}
+          onClick={() => dispatch({ type: 'number', payload: '3' })}
         >
           3
         </div>
         <div
           className={`${styles.numButton} ${grid.itemFour}`}
-          onClick={() => addValue('4')}
+          onClick={() => dispatch({ type: 'number', payload: '4' })}
         >
           4
         </div>
         <div
           className={`${styles.numButton} ${grid.itemFive}`}
-          onClick={() => addValue('5')}
+          onClick={() => dispatch({ type: 'number', payload: '5' })}
         >
           5
         </div>
         <div
           className={`${styles.numButton} ${grid.itemSix}`}
-          onClick={() => addValue('6')}
+          onClick={() => dispatch({ type: 'number', payload: '6' })}
         >
           6
         </div>
         <div
           className={`${styles.numButton} ${grid.itemSeven}`}
-          onClick={() => addValue('7')}
+          onClick={() => dispatch({ type: 'number', payload: '7' })}
         >
           7
         </div>
         <div
           className={`${styles.numButton} ${grid.itemEight}`}
-          onClick={() => addValue('8')}
+          onClick={() => dispatch({ type: 'number', payload: '8' })}
         >
           8
         </div>
         <div
           className={`${styles.numButton} ${grid.itemNine}`}
-          onClick={() => addValue('9')}
+          onClick={() => dispatch({ type: 'number', payload: '9' })}
         >
           9
         </div>
         <div
           className={`${styles.numButton} ${grid.itemTen}`}
-          onClick={() => addValue('0')}
+          onClick={() => dispatch({ type: 'number', payload: '0' })}
         >
           0
         </div>
         <div
           className={`${styles.numButton} ${grid.itemEleven}`}
-          onClick={() => addValue('.')}
+          onClick={() => dispatch({ type: 'decimal', payload: '.' })}
         >
           .
         </div>
         <div
           className={`${styles.numButton} ${grid.itemTwelve}`}
-          onClick={clear}
+          onClick={() => dispatch({ type: 'clear', payload: '.' })}
         >
           A/C
         </div>
