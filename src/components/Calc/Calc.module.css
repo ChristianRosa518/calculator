@@ -10,7 +10,7 @@
   width: 100%;
   height: 20%;
   background-color: aqua;
-  border-radius: 30px;
+  border-radius: 20px;
 
   padding: 20px;
   display: flex;
@@ -33,6 +33,7 @@
 .numButton {
   background-color: green;
   border-radius: 30px;
+  cursor: pointer;
 
   display: flex;
   justify-content: center;
