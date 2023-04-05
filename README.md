@@ -1,1 +1,1 @@
-# unfinished calculator using typescript and react. 
+unfinished calculator using typescript and react. 
